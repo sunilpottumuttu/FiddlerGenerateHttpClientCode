@@ -10,14 +10,12 @@ namespace HttpClientCode
 {
     public class BootStrap: IHandleExecAction, IFiddlerExtension
     {
-		private TabPage __codeTab;
-
-		private GenerateHttpClientCodeView  __view;
 
         private MenuItem __menuItem;
         private Session __selectedSession;
         private FrmGenerateHttpClientCode __frm;
         private string MESSAGEBOXTEXT = "HttpClientCode";
+
         public BootStrap()
 		{
 		}
@@ -28,22 +26,6 @@ namespace HttpClientCode
             this.__menuItem = new MenuItem("Generate Http Client Code");
             FiddlerApplication.UI.lvSessions.ContextMenu.MenuItems.Add(this.__menuItem);
             this.__menuItem.Click += new EventHandler(__menuItem_Click);
-
-            this.__codeTab = new TabPage("HttpClient Code");
-            this.__view = new GenerateHttpClientCodeView();
-            this.__codeTab.Controls.Add(this.__view);
-            this.__view.Dock = DockStyle.Fill;
-            FiddlerApplication.UI.tabsViews.TabPages.Add(this.__codeTab);
-            
-            
-            //this.__codeTab.ImageKey = "requestToCodeView";
-            if (!FiddlerApplication.UI.tabsViews.ShowToolTips)
-            {
-                
-
-                FiddlerApplication.UI.tabsViews.ShowToolTips = true;
-            }
-            this.__codeTab.ToolTipText = "Drag sessions into this tab to generate C# HttpClient Code";
         }
 
         string CanHandle()
@@ -70,8 +52,10 @@ namespace HttpClientCode
 
                 if (result == string.Empty)//Check whether this can handle or not
                 {
+                    string text = this.GenerateHttpClientCode();
+
                     this.__frm = new FrmGenerateHttpClientCode();
-                    this.__frm.SelectedSession = this.__selectedSession;
+                    this.__frm.SetText(text);
                     this.__frm.ShowDialog();
                 }
                 else
@@ -86,68 +70,44 @@ namespace HttpClientCode
             }
         }
 
-		private static bool CanHandle1(string command)
-		{
-            if (command == "HTTPCLIENTCODE")
+
+        public string GenerateHttpClientCode()
+        {
+            var template = new GenerateCode();
+            //template.Session = new Dictionary<string, object>(){ { "SelectedSession",this.__selectedSession }};
+            template.Session = new Dictionary<string, object>();
+            
+            template.Session.Add("uri", this.__selectedSession.fullUrl);
+            template.Session.Add("host", this.__selectedSession.host);
+            template.Session.Add("httpmethod", this.__selectedSession.RequestMethod);
+
+            #region Add HttpHeaders
+            var headers = new Dictionary<string, string>();
+            foreach (var item in this.__selectedSession.oRequest.headers)
             {
-                return true;
-            }
-            return command == "HTTPCLIENTCODE";
-		}
+                headers.Add(item.Name, item.Value);
+            } 
+            #endregion
+                
+            template.Session.Add("headers", headers);
+            
+            
+            
+            template.Initialize();
+            var generatedCode = template.TransformText();
+            return generatedCode;
+        }
+
 
         public bool OnExecAction(string sCommand)
         {
-            string[] strArrays = Utilities.Parameterize(sCommand);
-            if ((int)strArrays.Length == 0 || !BootStrap.CanHandle1(strArrays[0].ToUpperInvariant()) || this.__codeTab == null || this.__view == null)
-            {
-                return false;
-            }
-            if ((int)strArrays.Length != 1)
-            {
-                List<Session> sessions = new List<Session>();
-                Session[] allSessions = FiddlerApplication.UI.GetAllSessions();
-                for (int i = 0; i < (int)allSessions.Length; i++)
-                {
-                    Session session = allSessions[i];
-                    int num = 1;
-                    while (num < (int)strArrays.Length)
-                    {
-                        if (!session.uriContains(strArrays[num]))
-                        {
-                            num++;
-                        }
-                        else
-                        {
-                            sessions.Add(session);
-                            break;
-                        }
-                    }
-                }
-                if (sessions.Count != 0)
-                {
-                    FiddlerApplication.UI.tabsViews.SelectedTab = this.__codeTab;
-                    this.__view.SetSessions(sessions.ToArray());
-                }
-                else
-                {
-                    FiddlerApplication.UI.sbpInfo.Text = "No sessions match your criteria.";
-                }
-            }
-            else
-            {
-                FiddlerApplication.UI.tabsViews.SelectedTab = this.__codeTab;
-            }
             return true;
         }
 
 		public void OnBeforeUnload()
 		{
-			this.__codeTab.Controls.Remove(this.__view);
-			FiddlerApplication.UI.pageBuilder.Controls.Remove(this.__codeTab);
+            this.__frm.Dispose();
 		}
-
-	
-
-		
+     
     }
 }

@@ -1,0 +1,46 @@
+﻿<#@ template language="C#" #>
+<#@ import namespace="Fiddler"#>
+<#@ parameter type="System.String" name="uri"  #>
+<#@ parameter type="System.String" name="host"  #>
+<#@ parameter type="System.String" name="httpmethod"  #>
+<#@ parameter type="System.Collections.Generic.Dictionary<string,string>" name="headers" #>
+
+
+
+var uriBuilder = new UriBuilder("<# Write(uri); #>", "<# Write(host);#>");
+var httpClient = new HttpClient();
+
+<#
+	if(httpmethod.ToUpper()=="GET")
+    {
+#>
+var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
+<# 
+	} 
+#>
+
+<#
+	if(httpmethod.ToUpper()=="POST")
+    {
+#>
+var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriBuilder.ToString());
+<# 
+	} 
+#>
+
+
+
+<#
+    foreach (var item in headers)
+    {
+#>
+		 httpRequestMessage.Headers.Add("<# Write(item.Key.ToString()); #>","<# Write(item.Value.ToString()); #>");
+<#
+    }
+#>
+
+
+var httpResponseMessage = httpClient.SendAsync(httpRequestMessage).Result;
+
+var httpContent = httpResponseMessage.Content;
+string result = httpResponseMessage.Content.ReadAsStringAsync().Result;

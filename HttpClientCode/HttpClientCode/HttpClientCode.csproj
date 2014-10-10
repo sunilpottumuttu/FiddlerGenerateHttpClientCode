@@ -55,23 +55,30 @@
     <Compile Include="FrmGenerateHttpClientCode.Designer.cs">
       <DependentUpon>FrmGenerateHttpClientCode.cs</DependentUpon>
     </Compile>
-    <Compile Include="GenerateHttpClientCodeView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GenerateHttpClientCodeView.Designer.cs">
-      <DependentUpon>GenerateHttpClientCodeView.cs</DependentUpon>
+    <Compile Include="GenerateCode.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GenerateCode.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SessionsProperties.cs" />
-    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FrmGenerateHttpClientCode.resx">
       <DependentUpon>FrmGenerateHttpClientCode.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GenerateHttpClientCodeView.resx">
-      <DependentUpon>GenerateHttpClientCodeView.cs</DependentUpon>
-    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GenerateCode.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>GenerateCode.cs</LastGenOutput>
+      <Parameters>&lt;%3fxml version="1.0" encoding="utf-16"%3f&gt;
+&lt;ArrayOfParameterStorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ParameterStorage /&gt;
+&lt;/ArrayOfParameterStorage&gt;</Parameters>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
