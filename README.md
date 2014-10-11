@@ -14,3 +14,5 @@ Installation:-
  1. Copy HttpClientCode.dll from the .zip file into your Fiddler2\Scripts folder.
  2. You’ll need to restart Fiddler if it’s already running.
 
+Thanks & Regards
+Sunil
