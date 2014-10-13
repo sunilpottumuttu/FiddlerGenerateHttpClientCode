@@ -106,7 +106,8 @@ namespace HttpClientCode
 
 		public void OnBeforeUnload()
 		{
-            this.__frm.Dispose();
+            if (this.__frm != null)
+            { this.__frm.Dispose(); }
 		}
      
     }
